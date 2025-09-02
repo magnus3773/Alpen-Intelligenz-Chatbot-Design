@@ -658,7 +658,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
         </svg>
-        <span class="chat-launcher-text">Need help?</span>`;
+        <span class="chat-launcher-text">Brauchen Sie Hilfe?</span>`;
     
     // Add elements to DOM
     widgetRoot.appendChild(chatWindow);
@@ -739,17 +739,17 @@
         let isValid = true;
         
         if (!name) {
-            nameError.textContent = 'Please enter your name';
+            nameError.textContent = 'Bitte geben Sie Ihren Namen ein';
             nameInput.classList.add('error');
             isValid = false;
         }
         
         if (!email) {
-            emailError.textContent = 'Please enter your email';
+            emailError.textContent = 'Bitte geben Sie Ihre E-Mail-Adresse ein';
             emailInput.classList.add('error');
             isValid = false;
         } else if (!isValidEmail(email)) {
-            emailError.textContent = 'Please enter a valid email address';
+            emailError.textContent = 'Bitte geben Sie eine gültige E-Mail-Adresse ein';
             emailInput.classList.add('error');
             isValid = false;
         }
@@ -930,7 +930,7 @@
             // Show error message
             const errorMessage = document.createElement('div');
             errorMessage.className = 'chat-bubble bot-bubble';
-            errorMessage.textContent = "Sorry, I couldn't send your message. Please try again.";
+            errorMessage.textContent = "Tut uns leid, ich konnte Ihre Nachricht nicht senden. Bitte versuchen Sie es erneut.";
             messagesContainer.appendChild(errorMessage);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         } finally {

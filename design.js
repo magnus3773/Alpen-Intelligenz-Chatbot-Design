@@ -158,6 +158,10 @@
         .chat-assist-widget .chat-launcher.left-side { left: 20px; }
         .chat-assist-widget .chat-launcher:hover { transform: scale(1.05); box-shadow: var(--chat-shadow-lg); }
         .chat-assist-widget .chat-launcher svg { width: 24px; height: 24px; }
+        /* Launcher ausblenden, sobald das Chatfenster geöffnet ist */
+.chat-assist-widget .chat-window.visible + .chat-launcher {
+  display: none !important;
+}
         .chat-assist-widget .chat-launcher-text { font-weight: 600; font-size: 15px; white-space: nowrap; }
 
         .chat-assist-widget .chat-footer { padding: 10px; text-align: center; background: var(--chat-color-surface); border-top: 1px solid var(--chat-color-light); }

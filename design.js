@@ -350,7 +350,7 @@
             messagesContainer.removeChild(typingIndicator);
             const errorMessage = document.createElement('div');
             errorMessage.className = 'chat-bubble bot-bubble';
-            errorMessage.textContent = "Sorry, I couldn't send your message. Please try again.";
+            errorMessage.textContent = "Tut mir leid, doch ich konnte Ihre Nachricht nicht senden.";
             messagesContainer.appendChild(errorMessage);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         } finally {

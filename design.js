@@ -1,16 +1,15 @@
-// Interactive Chat Widget for n8n — Registrierung entfernt, CSS ergänzt
+// Interactive Chat Widget for n8n — Registrierung entfernt, CSS ergänzt, Mobile-Fixes (iOS Zoom & Scroll-Lock)
 (function() {
-    // Initialize widget only once
     if (window.N8nChatWidgetLoaded) return;
     window.N8nChatWidgetLoaded = true;
 
-    // Load font resource - using Poppins for a fresh look
+    // Font
     const fontElement = document.createElement('link');
     fontElement.rel = 'stylesheet';
     fontElement.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap';
     document.head.appendChild(fontElement);
 
-    // Apply widget styles (Basis wie Vorlage), plus dein Zusatz-CSS
+    // Styles (Navy/Weiß + Mobile-Fixes)
     const widgetStyles = document.createElement('style');
     widgetStyles.textContent = `
         .chat-assist-widget {
@@ -49,19 +48,18 @@
             transition: var(--chat-transition);
             opacity: 0;
             transform: translateY(20px) scale(0.95);
+            overscroll-behavior: contain;
         }
         .chat-assist-widget .chat-window.right-side { right: 20px; }
         .chat-assist-widget .chat-window.left-side { left: 20px; }
         .chat-assist-widget .chat-window.visible { display: flex; opacity: 1; transform: translateY(0) scale(1); }
 
+        /* Header */
         .chat-assist-widget .chat-header {
             padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: flex; align-items: center; gap: 12px;
             background: linear-gradient(135deg, var(--chat-color-primary) 0%, var(--chat-color-secondary) 100%);
-            color: white;
-            position: relative;
+            color: white; position: relative;
         }
         .chat-assist-widget .chat-header-logo {
             width: 32px; height: 32px; border-radius: var(--chat-radius-sm);
@@ -77,7 +75,7 @@
         }
         .chat-assist-widget .chat-close-btn:hover { background: rgba(255, 255, 255, 0.3); transform: translateY(-50%) scale(1.1); }
 
-        /* Welcome-Bereich bleibt im DOM, ist aber ausgeblendet (keine Registrierung) */
+        /* Welcome bleibt vorhanden, aber ausgeblendet */
         .chat-assist-widget .chat-welcome { display: none; }
         .chat-assist-widget .chat-response-time { font-size: 14px; color: var(--chat-color-text-light); margin: 0; }
 
@@ -86,7 +84,9 @@
 
         .chat-assist-widget .chat-messages {
             flex: 1; overflow-y: auto; padding: 20px; background: #f9fafb;
-            display: flex; flex-direction: column; gap: 16px; /* mehr Abstand zw. Nachrichten */
+            display: flex; flex-direction: column; gap: 16px; /* mehr Abstand */
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
         }
         .chat-assist-widget .chat-messages::-webkit-scrollbar { width: 6px; }
         .chat-assist-widget .chat-messages::-webkit-scrollbar-track { background: transparent; }
@@ -96,19 +96,19 @@
         }
 
         .chat-assist-widget .chat-bubble {
-            padding: 14px 18px; border-radius: var(--chat-radius-md); max-width: 85%;
-            word-wrap: break-word; font-size: 14px; line-height: 1.6; position: relative; white-space: pre-line;
+            padding: 14px 18px; border-radius: 18px; /* runde Bubbles */
+            max-width: 85%; word-wrap: break-word; font-size: 15px; line-height: 1.5;
+            position: relative; white-space: pre-line; box-shadow: var(--chat-shadow-sm);
         }
         .chat-assist-widget .chat-bubble.user-bubble {
-            background: linear-gradient(135deg, var(--chat-color-primary) 0%, var(--chat-color-secondary) 100%);
-            color: white; align-self: flex-end; border-bottom-right-radius: 6px; box-shadow: var(--chat-shadow-sm);
+            background: #0b1f3f; color: #ffffff; align-self: flex-end;
+            border-bottom-right-radius: 6px;
         }
         .chat-assist-widget .chat-bubble.bot-bubble {
-            background: white; color: var(--chat-color-text); align-self: flex-start;
-            border-bottom-left-radius: 6px; box-shadow: var(--chat-shadow-sm); border: 1px solid var(--chat-color-light);
+            background: #ffffff; color: #0b1f3f; align-self: flex-start;
+            border: 1px solid #0b1f3f; border-bottom-left-radius: 6px;
         }
 
-        /* Typing animation */
         .chat-assist-widget .typing-indicator {
             display: flex; align-items: center; gap: 4px; padding: 14px 18px; background: white;
             border-radius: var(--chat-radius-md); border-bottom-left-radius: 4px; max-width: 80px; align-self: flex-start;
@@ -123,15 +123,21 @@
             padding: 16px; background: var(--chat-color-surface); border-top: 1px solid var(--chat-color-light);
             display: flex; gap: 10px;
         }
+        /* iOS-Zoom verhindern: 16px+ */
         .chat-assist-widget .chat-textarea {
-            flex: 1; padding: 14px 16px; border: 1px solid var(--chat-color-light); border-radius: var(--chat-radius-md);
-            background: var(--chat-color-surface); color: var(--chat-color-text); resize: none; font-family: inherit;
-            font-size: 14px; line-height: 1.5; max-height: 120px; min-height: 48px; transition: var(--chat-transition);
+            flex: 1; padding: 14px 16px;
+            border: 1px solid var(--chat-color-light);
+            border-radius: var(--chat-radius-md);
+            background: #ffffff; color: #0b1f3f;
+            resize: none; font-family: inherit;
+            font-size: 16px; line-height: 1.5; /* 16px! */
+            max-height: 120px; min-height: 48px; transition: var(--chat-transition);
         }
         .chat-assist-widget .chat-textarea:focus {
-            outline: none; border-color: var(--chat-color-primary); box-shadow: 0 0 0 3px rgba(11, 31, 63, 0.2);
+            outline: none; border-color: var(--chat-color-primary);
+            box-shadow: 0 0 0 3px rgba(11, 31, 63, 0.2);
         }
-        .chat-assist-widget .chat-textarea::placeholder { color: var(--chat-color-text-light); }
+        .chat-assist-widget .chat-textarea::placeholder { color: #6b7280; opacity: 1; }
 
         .chat-assist-widget .chat-submit {
             background: linear-gradient(135deg, var(--chat-color-primary) 0%, var(--chat-color-secondary) 100%);
@@ -145,7 +151,7 @@
         .chat-assist-widget .chat-launcher {
             position: fixed; bottom: 20px; height: 56px; border-radius: var(--chat-radius-full);
             background: linear-gradient(135deg, var(--chat-color-primary) 0%, var(--chat-color-secondary) 100%);
-            color: white; border: none; cursor: pointer; box-shadow: var(--chat-shadow-md); z-index: 999;
+            color: white; border: none; cursor: pointer; box-shadow: var(--chat-shadow-md); z-index: 9999;
             transition: var(--chat-transition); display: flex; align-items: center; padding: 0 20px 0 16px; gap: 8px;
         }
         .chat-assist-widget .chat-launcher.right-side { right: 20px; }
@@ -158,66 +164,34 @@
         .chat-assist-widget .chat-footer-link { color: var(--chat-color-primary); text-decoration: none; font-size: 12px; opacity: 0.8; transition: var(--chat-transition); font-family: inherit; }
         .chat-assist-widget .chat-footer-link:hover { opacity: 1; }
 
-        /* Registrierung vollständig ausblenden (DOM bleiben lassen ist okay) */
+        /* Registrierung im DOM lassen, aber unsichtbar */
         .chat-assist-widget .user-registration { display: none !important; }
 
-        /* ===== Dein zusätzlicher CSS-Block (1:1 übernommen) ===== */
-        body {
-          font-family: system-ui;
-          background: #f06d06;
-          color: white;
-          text-align: center;
+        /* Scroll-Lock am Body, wenn Chat offen */
+        .chat-no-scroll { position: fixed; overflow: hidden; width: 100%; }
+
+        /* Mobile Layout-Verbesserungen */
+        @media (max-width: 480px) {
+            .chat-assist-widget .chat-window {
+                left: 0 !important; right: 0 !important; bottom: 0;
+                width: 100vw; height: calc(100dvh - 72px); /* dynamisch, Keyboard-sicherer */
+                border-radius: 16px 16px 0 0;
+                transform: translateZ(0);
+            }
+            .chat-assist-widget .chat-launcher { bottom: 12px; }
         }
-        /* Bot-Bubble: Weißer Hintergrund + Navy-Schrift */
-        .chat-assist-widget .chat-bubble.bot-bubble {
-          background: #ffffff !important;
-          color: #0b1f3f !important;
-          border: 1px solid #0b1f3f !important;
-          border-radius: 18px !important;      /* rundere Ecken */
-          border-bottom-left-radius: 4px !important; /* kleine „Sprechblasen-Optik“ */
-        }
-        /* User-Bubble: Navy + Weiß-Schrift + runde Bubble */
-        .chat-assist-widget .chat-bubble.user-bubble {
-          background: #0b1f3f !important;
-          color: #ffffff !important;
-          border-radius: 18px !important;
-          border-bottom-right-radius: 4px !important;
-        }
-        .chat-assist-widget .chat-bubble {
-          padding: 16px 10px !important;   /* mehr Platz innen */
-          font-size: 15px !important;      /* etwas größere Schrift */
-          line-height: 1.5 !important;     /* bessere Lesbarkeit */
-        }
-        /* Textbox unten: Weißer Hintergrund + Navy-Text */
-        .chat-assist-widget .chat-textarea {
-          background: #ffffff !important;
-          color: #0b1f3f !important;
-          border: 1px solid rgba(11,31,63,0.28) !important;
-        }
-        /* Placeholder in der Textbox: dunkelgrau, klar sichtbar */
-        .chat-assist-widget .chat-textarea::placeholder {
-          color: #6b7280 !important;
-          opacity: 1 !important;
-        }
-        /* ===== Ende Zusatz-CSS ===== */
+
+        /* ===== Dein Zusatz-CSS (Bubbles/Textbox) wurde integriert ===== */
+        body { font-family: system-ui; background: #f06d06; color: white; text-align: center; }
     `;
     document.head.appendChild(widgetStyles);
 
-    // Default configuration (Farben auf Navy voreingestellt, kann via Window.ChatWidgetConfig überschrieben werden)
+    // Defaults (Navy)
     const defaultSettings = {
-        webhook: {
-            url: '',
-            route: ''
-        },
+        webhook: { url: '', route: '' },
         branding: {
-            logo: '',
-            name: '',
-            welcomeText: '',
-            responseTimeText: '',
-            poweredBy: {
-                text: 'Powered by n8n',
-                link: 'https://n8n.partnerlinks.io/fabimarkl'
-            }
+            logo: '', name: '', welcomeText: '', responseTimeText: '',
+            poweredBy: { text: 'Powered by n8n', link: 'https://n8n.partnerlinks.io/fabimarkl' }
         },
         style: {
             primaryColor: '#0b1f3f',
@@ -229,61 +203,41 @@
         suggestedQuestions: []
     };
 
-    // Merge user settings with defaults (Vorlagen-Logik beibehalten)
-    const settings = window.ChatWidgetConfig ? 
+    // Merge Settings (Vorlagen-Logik beibehalten)
+    const settings = window.ChatWidgetConfig ?
         {
             webhook: { ...defaultSettings.webhook, ...window.ChatWidgetConfig.webhook },
             branding: { ...defaultSettings.branding, ...window.ChatWidgetConfig.branding },
-            style: { 
-                ...defaultSettings.style, 
+            style: {
+                ...defaultSettings.style,
                 ...window.ChatWidgetConfig.style,
-                // (Vorlagen-Kompatibilität) Falls jemand Lila setzt, greift die Vorlage – bleibt hier unangetastet:
                 primaryColor: window.ChatWidgetConfig.style?.primaryColor === '#854fff' ? '#10b981' : (window.ChatWidgetConfig.style?.primaryColor || defaultSettings.style.primaryColor),
                 secondaryColor: window.ChatWidgetConfig.style?.secondaryColor === '#6b3fd4' ? '#059669' : (window.ChatWidgetConfig.style?.secondaryColor || defaultSettings.style.secondaryColor)
             },
             suggestedQuestions: window.ChatWidgetConfig.suggestedQuestions || defaultSettings.suggestedQuestions
         } : defaultSettings;
 
-    // Session tracking
-    let conversationId = '';
-    let isWaitingForResponse = false;
-
-    // Create widget DOM structure
+    // DOM
     const widgetRoot = document.createElement('div');
     widgetRoot.className = 'chat-assist-widget';
-    
-    // Apply custom colors
     widgetRoot.style.setProperty('--chat-widget-primary', settings.style.primaryColor);
     widgetRoot.style.setProperty('--chat-widget-secondary', settings.style.secondaryColor);
     widgetRoot.style.setProperty('--chat-widget-tertiary', settings.style.secondaryColor);
     widgetRoot.style.setProperty('--chat-widget-surface', settings.style.backgroundColor);
     widgetRoot.style.setProperty('--chat-widget-text', settings.style.fontColor);
 
-    // Create chat panel
     const chatWindow = document.createElement('div');
     chatWindow.className = `chat-window ${settings.style.position === 'left' ? 'left-side' : 'right-side'}`;
-    
-    // Header + (versteckter) Welcome
+
     const welcomeScreenHTML = `
         <div class="chat-header">
             <img class="chat-header-logo" src="${settings.branding.logo}" alt="${settings.branding.name}">
             <span class="chat-header-title">${settings.branding.name}</span>
             <button class="chat-close-btn">×</button>
         </div>
-        <div class="chat-welcome" style="display:none">
-            <h2 class="chat-welcome-title">${settings.branding.welcomeText}</h2>
-            <button class="chat-start-btn" style="display:none">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
-                Start chatting
-            </button>
-            <p class="chat-response-time">${settings.branding.responseTimeText}</p>
-        </div>
-        <!-- Registrierung komplett entfernt -->
+        <div class="chat-welcome" style="display:none"></div>
     `;
 
-    // Chat interface (direkt aktiv)
     const chatInterfaceHTML = `
         <div class="chat-body active">
             <div class="chat-messages"></div>
@@ -301,10 +255,8 @@
             </div>
         </div>
     `;
-    
     chatWindow.innerHTML = welcomeScreenHTML + chatInterfaceHTML;
-    
-    // Toggle button
+
     const launchButton = document.createElement('button');
     launchButton.className = `chat-launcher ${settings.style.position === 'left' ? 'left-side' : 'right-side'}`;
     launchButton.innerHTML = `
@@ -312,28 +264,39 @@
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
         </svg>
         <span class="chat-launcher-text">Need help?</span>`;
-    
-    // Add elements to DOM
+
     widgetRoot.appendChild(chatWindow);
     widgetRoot.appendChild(launchButton);
     document.body.appendChild(widgetRoot);
 
-    // Get DOM elements
     const chatBody = chatWindow.querySelector('.chat-body');
     const messagesContainer = chatWindow.querySelector('.chat-messages');
     const messageTextarea = chatWindow.querySelector('.chat-textarea');
     const sendButton = chatWindow.querySelector('.chat-submit');
 
-    // Helper
+    // Scroll-Lock helpers
+    let isWaitingForResponse = false;
+    let conversationId = '';
+    let pageScrollY = 0;
+
+    function lockScroll() {
+        pageScrollY = window.scrollY || 0;
+        document.body.classList.add('chat-no-scroll');
+        document.body.style.top = `-${pageScrollY}px`;
+    }
+    function unlockScroll() {
+        document.body.classList.remove('chat-no-scroll');
+        const y = pageScrollY;
+        document.body.style.top = '';
+        window.scrollTo(0, y);
+    }
+
+    // Message helpers
     function createSessionId() { return crypto.randomUUID(); }
     function createTypingIndicator() {
         const indicator = document.createElement('div');
         indicator.className = 'typing-indicator';
-        indicator.innerHTML = `
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-        `;
+        indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
         return indicator;
     }
     function linkifyText(text) {
@@ -341,12 +304,11 @@
         return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="chat-link">${url}</a>`);
     }
 
-    // Send a message to the webhook
+    // Send a message
     async function submitMessage(messageText) {
         if (isWaitingForResponse) return;
         isWaitingForResponse = true;
 
-        // Session einmalig erzeugen (ohne Registrierung)
         if (!conversationId) conversationId = createSessionId();
 
         const requestData = {
@@ -357,7 +319,7 @@
             metadata: { userId: "", userName: "" }
         };
 
-        // user message
+        // user bubble
         const userMessage = document.createElement('div');
         userMessage.className = 'chat-bubble user-bubble';
         userMessage.textContent = messageText;
@@ -396,13 +358,14 @@
         }
     }
 
-    // Auto-resize textarea
-    function autoResizeTextarea() {
-        messageTextarea.style.height = 'auto';
-        messageTextarea.style.height = (messageTextarea.scrollHeight > 120 ? 120 : messageTextarea.scrollHeight) + 'px';
-    }
+    // Input sizing tweak to keep bottom in view after iOS keyboard shows
+    messageTextarea.addEventListener('focus', () => {
+        setTimeout(() => {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 250);
+    });
 
-    // Event listeners
+    // Events
     sendButton.addEventListener('click', () => {
         const messageText = messageTextarea.value.trim();
         if (messageText && !isWaitingForResponse) {
@@ -411,7 +374,10 @@
             messageTextarea.style.height = 'auto';
         }
     });
-    messageTextarea.addEventListener('input', autoResizeTextarea);
+    messageTextarea.addEventListener('input', () => {
+        messageTextarea.style.height = 'auto';
+        messageTextarea.style.height = (messageTextarea.scrollHeight > 120 ? 120 : messageTextarea.scrollHeight) + 'px';
+    });
     messageTextarea.addEventListener('keypress', (event) => {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
@@ -423,19 +389,22 @@
             }
         }
     });
+
+    // Toggle open/close + Scroll-Lock
     launchButton.addEventListener('click', () => {
         chatWindow.classList.toggle('visible');
+        if (chatWindow.classList.contains('visible')) lockScroll(); else unlockScroll();
     });
 
-    // Close button
     const closeButtons = chatWindow.querySelectorAll('.chat-close-btn');
     closeButtons.forEach(button => {
         button.addEventListener('click', () => {
             chatWindow.classList.remove('visible');
+            unlockScroll();
         });
     });
 
-    // Chat beim Laden sichtbar machen? -> optional:
-    // chatWindow.classList.add('visible');
+    // Optional: Chat beim Laden direkt offen
+    // chatWindow.classList.add('visible'); lockScroll();
 
 })();
